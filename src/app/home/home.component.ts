@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Course } from '../model/course';
-import { noop } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { createHttpObservable } from '../common/util';
 import { ICourse } from '../common/course.interface';
@@ -13,8 +13,8 @@ import { ECourseCategory } from '../common/course-category.enum';
 })
 export class HomeComponent implements OnInit {
 
-  beginnerCourses: Course[];
-  advancedCourses: Course[];
+  beginnerCourses$: Observable<Course[]>;
+  advancedCourses$: Observable<Course[]>;
 
   ngOnInit() {
 
@@ -23,14 +23,13 @@ export class HomeComponent implements OnInit {
       map((res) => Object.values(res.payload)),
     );
 
-    courses$.subscribe(
-      (courses) => {
-        this.beginnerCourses = courses.filter((course) => course.category === ECourseCategory.BEGINNER);
-        this.advancedCourses = courses.filter((course) => course.category === ECourseCategory.ADVANCED);
-      },
-      noop,
-      () => console.log('completed'),
-    );
+    this.beginnerCourses$ = courses$.pipe(
+      map((courses) => courses.filter((course) => course.category === ECourseCategory.BEGINNER))
+    )
+
+    this.advancedCourses$ = courses$.pipe(
+      map((courses) => courses.filter((course) => course.category === ECourseCategory.ADVANCED))
+    )
 
   }
 
