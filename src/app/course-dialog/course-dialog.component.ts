@@ -22,7 +22,8 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<CourseDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) course: Course) {
+    @Inject(MAT_DIALOG_DATA) course: Course
+  ) {
 
     this.course = course;
 
@@ -32,7 +33,6 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
       releasedAt: [moment(), Validators.required],
       longDescription: [course.longDescription, Validators.required]
     });
-
   }
 
   ngOnInit() {
@@ -43,7 +43,6 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
       )
       .subscribe();
   }
-
 
   saveCourse(changes) {
     return fromPromise(fetch(
@@ -60,9 +59,7 @@ export class CourseDialogComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit() {
 
-
   }
-
 
   close() {
     this.dialogRef.close();
