@@ -3,7 +3,11 @@ import { IAPIResponse } from './api-response.interface';
 
 export const createHttpObservable = <T>(url: string): Observable<IAPIResponse<T>> => {
   return new Observable<IAPIResponse<T>>((observer) => {
-    fetch(url)
+
+    const controller = new AbortController();
+    const signal = controller.signal;
+
+    fetch(url, { signal })
       .then((response) => {
         return response.json();
       })
@@ -14,5 +18,8 @@ export const createHttpObservable = <T>(url: string): Observable<IAPIResponse<T>
       .catch((error) => {
         observer.error(error);
       })
+
+    return () => controller.abort();
+
   });
 }
