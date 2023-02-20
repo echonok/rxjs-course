@@ -5,6 +5,7 @@ import { map, shareReplay } from 'rxjs/operators';
 import { createHttpObservable } from '../common/util';
 import { ICourse } from '../common/course.interface';
 import { ECourseCategory } from '../common/course-category.enum';
+import { IAPIResponse } from '../common/api-response.interface';
 
 @Component({
   selector: 'home',
@@ -18,7 +19,7 @@ export class HomeComponent implements OnInit {
 
   ngOnInit() {
 
-    const http$ = createHttpObservable<ICourse>('./api/courses');
+    const http$ = createHttpObservable<IAPIResponse<ICourse>>('./api/courses');
     const courses$ = http$.pipe(
       map((res) => Object.values(res.payload)),
       shareReplay(),

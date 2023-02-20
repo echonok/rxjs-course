@@ -1,8 +1,7 @@
 import { Observable } from 'rxjs';
-import { IAPIResponse } from './api-response.interface';
 
-export const createHttpObservable = <T>(url: string): Observable<IAPIResponse<T>> => {
-  return new Observable<IAPIResponse<T>>((observer) => {
+export const createHttpObservable = <T>(url: string): Observable<T> => {
+  return new Observable<T>((observer) => {
 
     const controller = new AbortController();
     const signal = controller.signal;
@@ -11,7 +10,7 @@ export const createHttpObservable = <T>(url: string): Observable<IAPIResponse<T>
       .then((response) => {
         return response.json();
       })
-      .then((body: IAPIResponse<T>) => {
+      .then((body: T) => {
         observer.next(body);
         observer.complete();
       })

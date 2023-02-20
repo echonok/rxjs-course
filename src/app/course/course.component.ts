@@ -1,57 +1,62 @@
-import {AfterViewInit, Component, ElementRef, OnInit, ViewChild} from '@angular/core';
-import {ActivatedRoute} from "@angular/router";
-import {Course} from "../model/course";
+import { AfterViewInit, Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Course } from '../model/course';
 import {
-    debounceTime,
-    distinctUntilChanged,
-    startWith,
-    tap,
-    delay,
-    map,
-    concatMap,
-    switchMap,
-    withLatestFrom,
-    concatAll, shareReplay
+  debounceTime,
+  distinctUntilChanged,
+  map, switchMap,
 } from 'rxjs/operators';
-import {merge, fromEvent, Observable, concat} from 'rxjs';
-import {Lesson} from '../model/lesson';
-
+import { concat, fromEvent, Observable } from 'rxjs';
+import { Lesson } from '../model/lesson';
+import { createHttpObservable } from '../common/util';
 
 @Component({
-    selector: 'course',
-    templateUrl: './course.component.html',
-    styleUrls: ['./course.component.css']
+  selector: 'course',
+  templateUrl: './course.component.html',
+  styleUrls: ['./course.component.css']
 })
 export class CourseComponent implements OnInit, AfterViewInit {
 
+  courseId: string = '';
+  course$: Observable<Course>;
+  lessons$: Observable<Lesson[]>;
 
-    course$: Observable<Course>;
-    lessons$: Observable<Lesson[]>;
+  @ViewChild('searchInput', { static: true, read: ElementRef }) input: ElementRef;
 
+  constructor(
+    private route: ActivatedRoute
+  ) {
+  }
 
-    @ViewChild('searchInput', { static: true }) input: ElementRef;
+  ngOnInit() {
+    const courseId = this.route.snapshot.params['id'];
+    this.course$ = createHttpObservable<Course>(`/api/courses/${courseId}`);
+  }
 
-    constructor(private route: ActivatedRoute) {
+  ngAfterViewInit() {
 
+    const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
+      .pipe(
+        map((event) => event.target.value),
+        debounceTime(400),
+        distinctUntilChanged(),
+        switchMap((search) => this.loadLessons(search))
+      );
+    const initialLessons$ = this.loadLessons();
+    this.lessons$ = concat(
+      initialLessons$,
+      searchLessons$
+    );
+  }
 
-    }
-
-    ngOnInit() {
-
-        const courseId = this.route.snapshot.params['id'];
-
-
-
-    }
-
-    ngAfterViewInit() {
-
-
-
-
-    }
-
-
-
+  loadLessons(search = ''): Observable<Lesson[]> {
+    return createHttpObservable<{ payload: Lesson[] }>(`/api/lessons?courseId=${this.courseId}&filter=${search}`)
+      .pipe(
+        map(({ payload }) => {
+          console.log(payload)
+          return payload
+        })
+      );
+  }
 
 }
