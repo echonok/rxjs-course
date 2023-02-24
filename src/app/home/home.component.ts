@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { Course } from '../model/course';
-import { Observable } from 'rxjs';
-import { map, shareReplay } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError, finalize, map, shareReplay } from 'rxjs/operators';
 import { createHttpObservable } from '../common/util';
 import { ICourse } from '../common/course.interface';
 import { ECourseCategory } from '../common/course-category.enum';
@@ -21,6 +21,13 @@ export class HomeComponent implements OnInit {
 
     const http$ = createHttpObservable<IAPIResponse<ICourse>>('./api/courses');
     const courses$ = http$.pipe(
+      catchError((err) => {
+        console.error(err);
+        return throwError(err);
+      }),
+      finalize(() => {
+        console.log('Finalize...');
+      }),
       map((res) => Object.values(res.payload)),
       shareReplay(),
     );
