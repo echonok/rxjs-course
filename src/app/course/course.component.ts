@@ -4,7 +4,7 @@ import { Course } from '../model/course';
 import {
   debounceTime,
   distinctUntilChanged,
-  map, switchMap,
+  map, startWith, switchMap,
 } from 'rxjs/operators';
 import { concat, fromEvent, Observable } from 'rxjs';
 import { Lesson } from '../model/lesson';
@@ -29,8 +29,8 @@ export class CourseComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-    const courseId = this.route.snapshot.params['id'];
-    this.course$ = createHttpObservable<Course>(`/api/courses/${courseId}`);
+    this.courseId = this.route.snapshot.params['id'];
+    this.course$ = createHttpObservable<Course>(`/api/courses/${this.courseId}`);
   }
 
   ngAfterViewInit() {
@@ -38,6 +38,7 @@ export class CourseComponent implements OnInit, AfterViewInit {
     const searchLessons$ = fromEvent<any>(this.input.nativeElement, 'keyup')
       .pipe(
         map((event) => event.target.value),
+        startWith(''),
         debounceTime(400),
         distinctUntilChanged(),
         switchMap((search) => this.loadLessons(search))
